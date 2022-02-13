@@ -12,7 +12,7 @@ global:
 
   # Deploy Pega nodes
   actions:
-
+         
     execute: "deploy"
 
   # Add custom certificates to be mounted to container, as a map
@@ -20,23 +20,23 @@ global:
   # Provide JDBC connection information to the Pega relational database
   #   If you are installing or upgrading on IBM DB2, update the udb.conf file in the /charts/pega/charts/installer/config/udb directory with any additional connection properties.
   jdbc:
-    #   url     Valid values are:
+    #   url	Valid values are:
     #
     #   Oracle              jdbc:oracle:thin:@//localhost:1521/dbName
-    #   IBM DB/2 z / OS         jdbc:db2://localhost:50000/dbName
+    #   IBM DB/2 z / OS 	jdbc:db2://localhost:50000/dbName
     #   IBM DB/2            jdbc:db2://localhost:50000/dbName:fullyMaterializeLobData=true;fullyMaterializeInputStreams=true;
     #                       progressiveStreaming=2;useJDBC4ColumnNameAndLabelSemantics=2;
     #   SQL Server          jdbc:sqlserver://localhost:1433;databaseName=dbName;selectMethod=cursor;sendStringParametersAsUnicode=false
     #   PostgreSQL          jdbc:postgresql://localhost:5432/dbName
     url: "jdbc:postgresql://18.213.215.92:5432/Pega"
-    #   driverClass     -- jdbc class.  Valid values are:
+    #   driverClass 	-- jdbc class.  Valid values are:
     #
     #   Oracle              oracle.jdbc.OracleDriver
     #   IBM DB/2            com.ibm.db2.jcc.DB2Driver
     #   SQL Server          com.microsoft.sqlserver.jdbc.SQLServerDriver
     #   PostgreSQL          org.postgresql.Driver
     driverClass: "org.postgresql.Driver"
-    #   pega.database.type      Valid values are: mssql, oracledate, udb, db2zos, postgres
+    #   pega.database.type	Valid values are: mssql, oracledate, udb, db2zos, postgres
     dbType: "postgres"
     #   For databases that use multiple JDBC driver files (such as DB2), specify comma separated values for 'driverUri'
     driverUri: "https://jdbc.postgresql.org/download/postgresql-42.3.2.jar"
@@ -77,6 +77,10 @@ global:
       # the load balancer.
       nodeType: "WebUser"
 
+#     talked about in context to OpenShift - security context
+#      custom:
+#        serviceAccountName: pega
+#
       # Pega requestor specific properties
       requestor:
         # Inactivity time after which requestor is passivated
@@ -94,7 +98,7 @@ global:
 
         # Enter the domain name to access web nodes via a load balancer.
         #  e.g. web.mypega.example.com
-        domain: "web.mypega.example.com"
+        domain: "web.apps.pega.naairbg.com"
         tls:
           # Enable TLS encryption
           enabled: true
@@ -115,7 +119,6 @@ global:
 
       livenessProbe:
         port: 8081
-
 
       # Optionally overridde default resource specifications
       # cpuRequest: 2
@@ -146,6 +149,11 @@ global:
       # a collection of background node types and will not be exposed to
       # the load balancer.
       nodeType: "BackgroundProcessing,Search,Batch,RealTime,Custom1,Custom2,Custom3,Custom4,Custom5,BIX"
+
+#     talked about in context to OpenShift - security context
+#      custom:
+#        serviceAccountName: pega
+#
 
       replicas: 1
       javaOpts: ""
@@ -200,7 +208,7 @@ global:
       ingress:
         # Enter the domain name to access web nodes via a load balancer.
         #  e.g. web.mypega.example.com
-        domain: "web.mypega.example.com"
+        domain: "stream.apps.pega.naairbg.com"
         tls:
           # Enable TLS encryption
           enabled: true
@@ -210,7 +218,16 @@ global:
 
       livenessProbe:
         port: 8081
+#        initialDelaySeconds: 60
+#        timeoutSeconds: 30
+#        failureThreshold: 5
+#      readinessProbe:
+#        initialDelaySeconds: 400
+#        failureThreshold: 30
 
+      startupProbe:
+        initialDelaySeconds: 900  # 9 minutes
+        failureThreshold: 30
       # To configure an alternative user for your custom image, set value for runAsUser
       # See, https://github.com/pegasystems/pega-helm-charts/blob/master/charts/pega/README.md#security-context
       # securityContext:
@@ -263,10 +280,26 @@ dds:
 # Note: This Elasticsearch deployment is used for Pega search, and is not the same Elasticsearch deployment used by the EFK stack.
 # These search nodes will be deployed regardless of the Elasticsearch configuration above.
 # Refer to README document to configure `Search and Reporting Service` as a search functionality provider under this section.
+#pegasearch:
+#  image: "thomasgpeters/my-pega-search:8.6.2"
+#  memLimit: "3Gi"
+#  replicas: 1
+
+#pegasearch:
+#  image: "thomasgpeters/my-pega-search:8.6.2"
+#  memLimit: "3Gi"
+#  replicas: 1
+#  podSecurityContext:
+#    runAsUser: 1000
+#  minimumMasterNodes: 2
+#  custom:
+#    env:
+#    - name: TZ
+#      value: "EST5EDT"
+
 pegasearch:
-  image: "thomasgpeters/my-pega-search:8.6.2"
-  memLimit: "3Gi"
-  replicas: 1
+  externalSearchService: true
+  externalURL: "http://srs-pega.mypega.svc.cluster.local" 
 
 # Pega Installer settings.
 installer:
@@ -297,3 +330,4 @@ hazelcast:
   username: ""
   # Password to be used in client server hazelcast mode for authentication
   password: ""
+
