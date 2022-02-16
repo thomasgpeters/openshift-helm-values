@@ -8,12 +8,12 @@ global:
 srs:
   # always set srs.srsStorage.provisionInternalESCluster=false when srs.enabled=false
   enabled: true
-  deploymentName: "pegasrs"
+  deploymentName: "search"
   # specify unique name for the deployment based on org app and/or srs applicable environment name. eg: acme-demo-dev-srs
   # srs-service configuration
   srsRuntime:
     # Number of pods to provision
-    replicaCount: 2
+    replicaCount: 1
     # docker image of the srs-service, platform-services/search-n-reporting-service:dockerTag
     srsImage: "thomasgpeters/my-pega-search:8.6.2"
     env:
