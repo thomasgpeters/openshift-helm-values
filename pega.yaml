@@ -22,7 +22,7 @@ global:
     #                       progressiveStreaming=2;useJDBC4ColumnNameAndLabelSemantics=2;
     #   SQL Server          jdbc:sqlserver://localhost:1433;databaseName=dbName;selectMethod=cursor;sendStringParametersAsUnicode=false
     #   PostgreSQL          jdbc:postgresql://localhost:5432/dbName
-    url: "jdbc:postgresql://Thomas-DS81D.imagery.local:5432/Pega"
+    url: "jdbc:postgresql://192.168.1.203:5432/Pega"
     #   driverClass 	-- jdbc class.  Valid values are:
     #
     #   Oracle              oracle.jdbc.OracleDriver
@@ -58,6 +58,17 @@ global:
   # For a minimal deployment, use a single tier to reduce resource consumption.
   tier:
     - name: "web"
+      livenessProbe:
+        initialDelaySeconds: 60
+        timeoutSeconds: 30
+        failureThreshold: 5
+      readinessProbe:
+        initialDelaySeconds: 400
+        failureThreshold: 30
+      startupProbe:
+        initialDelaySeconds: 400
+        failureThreshold: 30
+        
       nodeType: "Stream,BackgroundProcessing,WebUser,Search"
 
       service:

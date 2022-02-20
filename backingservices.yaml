@@ -52,10 +52,23 @@ srs:
 # as per runtime and storage requirements.
 elasticsearch:
   imageTag: 7.10.2
+
+  # liveness, rediness, startup Probes
+  livenessProbe:
+    initialDelaySeconds: 60
+    timeoutSeconds: 30
+    failureThreshold: 5
+  readinessProbe:
+    initialDelaySeconds: 400
+    failureThreshold: 30
+  startupProbe:
+    initialDelaySeconds: 400
+    failureThreshold: 30
+   
   # Permit co-located instances for solitary minikube virtual machines.
   antiAffinity: "soft"
   # Shrink default JVM heap.
-  esJavaOpts: "-Xmx1024m -Xms1024m"
+  esJavaOpts: "-Xmx2048m -Xms2048m"
   # Allocate smaller chunks of memory per pod.
   protocol: http
   # This section specifies the elasticsearch cluster configuration for authentication and TLS.
